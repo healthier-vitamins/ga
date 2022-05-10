@@ -1,0 +1,17 @@
+
+.main-grid {
+  height: 400px;
+  width: 200px;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: yellow;
+}
+
+.grid {
+  width: 20px;
+  height: 20px;
+}
+
+.tetromino {
+  background-color: aquamarine;
+}
