@@ -1,17 +1,49 @@
+h1 {
+  text-align: center;
+}
+
+.container {
+  margin: 20px auto;
+  width: 70%;
+  height: 700px;
+  display: flex;
+  justify-content: center;
+  border: 1px solid black;
+}
 
 .main-grid {
-  height: 400px;
-  width: 200px;
+  margin: 40px 0;
+  height: 540px;
+  width: 300px;
   display: flex;
   flex-wrap: wrap;
-  background-color: yellow;
+  background-color: white;
+
 }
 
-.grid {
-  width: 20px;
-  height: 20px;
+.mini-grid {
+  padding: 40px 0;
+  margin: 0px 50px;
+  height: 120px;
+  width: 120px;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white;
 }
 
-.tetromino {
+.grid, .lesser-grid {
+  width: 30px;
+  height: 30px;
+  border: 1mm groove #f7f7f7;
+  
+}
+
+.final {
+  border: none;
+}
+
+.tetromino, .mini-tetromino {
   background-color: aquamarine;
+
 }
+
