@@ -83,9 +83,12 @@ const drawMainGrid = () => {
     }
   }
   const containerDiv = document.createElement("div");
-  containerDiv.className = ("container");
+  containerDiv.classList.add("container", "nes-container", "is-rounded");
+  const maxContainer = document.createElement("div");
+  maxContainer.classList.add("max-container");
   const mainGrid = document.querySelector(".main-grid");
-  containerDiv.append(mainGrid);
+  maxContainer.append(mainGrid);
+  containerDiv.append(maxContainer);
   document.querySelector("body").append(containerDiv);
 
   drawTakenRow();
@@ -93,9 +96,13 @@ const drawMainGrid = () => {
 
 // draw mini grid, 4x4.
 const drawMiniGrid = () => {
-  const miniGrid = document.createElement("div");
-  miniGrid.className = "mini-grid";
-  document.querySelector(".container").append(miniGrid);
+  const miniContainer = document.createElement("div");
+  miniContainer.classList.add("mini-container");
+  const miniGrid = document.querySelector(".mini-grid")
+  document.querySelector(".container").append(miniContainer);
+  miniContainer.append(miniGrid);
+
+  miniContainer.append(miniGrid);
   for (let col = 0; col < 4; col++) {
     for (let row = 0; row < 4; row++) {
       const tempDiv = document.createElement("div");
@@ -103,23 +110,33 @@ const drawMiniGrid = () => {
       miniGrid.append(tempDiv);
     }
   }
-  //add score-display
   game.miniSquares = document.querySelectorAll(".lesser-grid");
-  const scoreDisplay = document.createElement("section");
+
+  //add score-display
+  const scoreTitle = document.createElement("p");
+  scoreTitle.classList.add("title");
+  scoreTitle.innerHTML = "Score";
+  const scoreDisplay = document.createElement("p");
   scoreDisplay.classList.add("score-display");
   scoreDisplay.innerHTML = 0;
-  const scoreTitle = document.createElement("div")
-  scoreTitle.innerHTML = "Score: "
-  document.querySelector(".mini-grid").append(scoreTitle);
+  const scoreContainer = document.createElement("div")
+  scoreContainer.classList.add("score-head", "nes-container", "with-title", "is-centered");
+  miniContainer.append(scoreContainer);
+  scoreContainer.append(scoreTitle);
   scoreTitle.append(scoreDisplay);
 
   //add startbutton
+  const startBtnDiv = document.createElement("div");
+  startBtnDiv.classList.add("startpause-button");
   const startBtn = document.createElement("button");
-  startBtn.classList.add("start-pause");
+  startBtn.classList.add("start-pause", "nes-btn");
+  startBtn.setAttribute("href", "#");
   startBtn.innerHTML = "Start/Pause";
-  document.querySelector(".mini-grid").append(startBtn);
+  startBtnDiv.append(startBtn);
+  miniContainer.append(startBtnDiv);
 }
 
+//draw final row of class "taken"
 const drawTakenRow = () => {
   for (let i = 0; i < 10; i++) {
     const tempDiv = document.createElement("div");
@@ -130,6 +147,7 @@ const drawTakenRow = () => {
   game.squares = Array.from(document.querySelectorAll(".grid"));
 }
 
+//clear mini grid for up next tetromino
 const clearMiniGrid = () => {
   game.miniSquares.forEach(square => {
     square.classList.remove("tetromino");
@@ -137,7 +155,7 @@ const clearMiniGrid = () => {
     game.isMiniGridFilled = false;
   })
 }
-
+//fill mini grid with next up tetromino
 const fillMiniGrid = () => { 
   clearMiniGrid();
   game.miniTetrominos[game.nextRandomIndex].forEach(index => { 
@@ -147,6 +165,7 @@ const fillMiniGrid = () => {
   game.isMiniGridFilled = true;
 }
 
+//controlsss
 const control = (e) => {
   if (e.key === "ArrowLeft") {
     moveLeft();
@@ -159,6 +178,9 @@ const control = (e) => {
   }
   else if (e.key === "ArrowDown") {
     moveDown();
+  }
+  else if (e.key === " ") {
+    instantDown();
   }
 }
 
@@ -305,29 +327,53 @@ const canRotate = () => {
   return true;
 }
 
+const instantDown = () => {
+  undraw();
+  let hitLimit = false;
+  let newWidth = 0;
+  while (!hitLimit) {
+    if (game.currentTetromino.some(index => game.squares[index + game.currentPosition + newWidth].classList.contains("taken"))) {
+      game.currentPosition = game.currentPosition + (newWidth - game.width);
+      hitLimit = true;
+    }
+    newWidth += game.width;
+  }
+  draw();
+  freeze();
+}
+
 const addScore = () => {
-  //loop over every square, with increment based on each row
-  //also indexing every single row. (allows iteration over it)
+  let multiplier = 0;
+  //loops over every square, with an increment of 1 row
+  //also initialize every row (allows iteration over it)
   for (let i = 0; i < game.squares.length - 10; i += game.width) {
     const row = [i, i+1, i+2, i+3, i+4, i+5, i+6, i+7, i+8,  i+9];
 
-    //if condition of every row has property of "taken"
+    //if condition of every element in a row has property of "taken"
     if (row.every(index => game.squares[index].classList.contains("taken"))) {
-      game.score += 10;
-      document.querySelector(".score-display").innerHTML = game.score;
+      multiplier++;
+
       //removes all classes within row
       row.forEach(index => {
         game.squares[index].classList.remove("taken", "tetromino");
         game.squares[index].style.removeProperty("background-color");
       })
-      //update the array such that removed row, replaces very first row
+
+      //update the array such that removed row(lowest), replaces very first row(highest)
       const removedSquares = game.squares.splice(i, game.width);
       game.squares = removedSquares.concat(game.squares);
-      //then append updated array(firstRow = removedRow)
+      //then append updated array
       const mainGridDiv = document.querySelector(".main-grid");
       game.squares.forEach(cell => mainGridDiv.append(cell));
     }
   }
+  if (multiplier > 1) {
+    game.score = game.score + ((10 * multiplier) * multiplier);
+  }
+  else if (multiplier === 1) {
+    game.score += 10;
+  }
+  document.querySelector(".score-display").innerHTML = game.score;
 }
 
 //start/pause button for either, new game, game over or pause/play
@@ -362,9 +408,8 @@ const startPause = () => {
 
 //game over condition
 const gameOver = () => {
-
   for (let i = 0; i < game.squares.length - 200; i++) {
-    if (game.squares[i].classList.contains("taken")) {
+    if (game.squares[i].classList.contains("taken") || game.currentTetromino.some(index => game.squares[index + game.currentPosition].classList.contains("taken"))) {
       alert("noob");
       clearInterval(game.timerId);
       game.timerId = null;
@@ -378,7 +423,7 @@ const gameOver = () => {
   // if (game.currentTetromino.some(index => game.squares[index + game.currentPosition].classList.contains("taken"))) {
 }
 
-//resets entire screen
+//resets entire screen (includes mini grid display)
 const clearsAll = () => {
   for (let i = 0; i < game.squares.length - 10; i++) {
     game.squares[i].classList.remove("tetromino", "taken");
@@ -395,5 +440,26 @@ const clearsAll = () => {
 document.addEventListener("DOMContentLoaded", () => {
   drawMainGrid();
   drawMiniGrid();
+  document.addEventListener("keydown", (event) => event.preventDefault());
   document.querySelector(".start-pause").addEventListener("click", startPause);
 })
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+
+Come back
+1. Change array of 210 to arrays of rows and cols. eg:
+squares = [[col, col, col][col, col, col]];
+  ^ Note rotation for 2d array.
+
+2. Play around with CSS.
+  ^ Dialogs, different game states with animation.
+
+3. Add history/leaderboard using cache?
+
+4. Add hold "arrowdown" key fit in tight slots.
+
+5. Add timer for each round.
+
+*/
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
