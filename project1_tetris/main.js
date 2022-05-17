@@ -1,3 +1,9 @@
+/*
+Thank you kubowania for your delightful guide.
+https://www.youtube.com/watch?v=rAUn1Lom6dw&t=2356s
+https://github.com/kubowania/Tetris-Basic 
+*/
+
 import './style.css'
 
 // initialize/declare variables needed.
