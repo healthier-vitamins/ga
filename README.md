@@ -1,6 +1,9 @@
 # Tetris
 A simple functional game of Tetris created in pure JavaScript.
 
+## Deployment
+https://tetris-pknmxdycv-healthier-vitamins.vercel.app/
+
 ## Controls:
 | Controls | Actions |
 | ----------- | ----------- |
