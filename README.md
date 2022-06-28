@@ -11,4 +11,5 @@ A simple functional game of Tetris created in pure JavaScript.
 | Spacebar | Snap tetromino down instantly |
 
 ## Work in progress:
-1. 
+1. History/Leaderboard
+2. Timer for each round
